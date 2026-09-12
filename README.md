@@ -1,98 +1,98 @@
-# Assignment01
-# Hiver Support AI Agent
+# 🤖 Hiver Support AI Agent
 
-An AI-powered customer support agent built for the **Hiver SDE Intern Take-Home Assignment**.
+### AI-Powered Customer Support Agent | Hiver SDE Intern Take-Home Assignment
 
-The system analyzes customer-support conversations, classifies incoming messages into support intents, retrieves historically similar conversations, drafts a brand-grounded response, and decides whether the request should be automatically handled or escalated to a human.
+An end-to-end AI customer-support agent designed to assist support teams by **understanding customer intent, retrieving relevant historical conversations, drafting grounded responses, and determining when human intervention is required**.
+
+This project was developed as part of the **Hiver SDE Intern Take-Home Assignment** using real-world customer-support conversation data.
 
 ---
 
-## 1. Problem
+## 👩‍💻 About the Project
 
-Customer-support conversations are noisy, short, typo-heavy, and often lack context.
+Customer-support data is often messy, short, inconsistent, and full of spelling mistakes.
 
-The goal of this project is to build a support agent that can:
+A useful support agent therefore needs to do more than simply generate text. It needs to:
 
-1. Classify incoming customer messages into a small set of intents.
-2. Draft replies grounded in historically similar customer-support conversations.
-3. Decide whether a message can be auto-handled or should be escalated to a human.
-4. Provide measurable evidence that the system works.
+* Understand what the customer is asking.
+* Identify the likely support intent.
+* Learn from how similar issues were handled historically.
+* Produce a useful and grounded response.
+* Recognize when it is uncertain.
+* Escalate uncertain cases instead of confidently generating an incorrect answer.
 
-The system is designed around the following pipeline:
+This project focuses on building that complete workflow.
+
+---
+
+# 🎯 Objectives
+
+The system is designed to perform three core tasks:
+
+### 1. Intent Classification
+
+Classify incoming customer messages into a small set of support intents derived from the dataset.
+
+### 2. Historical Grounding
+
+Retrieve similar historical customer-support conversations and use them as evidence when drafting a response.
+
+### 3. Human Escalation
+
+Estimate whether the system has enough confidence and evidence to handle the request automatically.
+
+If confidence is too low, the system escalates the request to a human support agent.
+
+---
+
+# 🏗️ System Architecture
 
 ```text
-Customer Message
-       |
-       v
-Intent Classification
-       |
-       v
-Confidence Check
-       |
-       +-------- Low Confidence --------> Human Escalation
-       |
-       v
-Historical Conversation Retrieval
-       |
-       v
-Grounded Reply Draft
-       |
-       v
-Final Support Decision
+                    ┌─────────────────────┐
+                    │   Customer Message  │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │ Intent Classification│
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │  Confidence Score   │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────┴──────────┐
+                    │                     │
+              High Confidence       Low Confidence
+                    │                     │
+                    ▼                     ▼
+          Historical Retrieval      Human Escalation
+                    │
+                    ▼
+          Similar Conversations
+                    │
+                    ▼
+             Evidence Context
+                    │
+                    ▼
+             Drafted Response
+                    │
+                    ▼
+             Support Decision
 ```
 
----
+The architecture follows a simple principle:
 
-## 2. Dataset
-
-The primary dataset is **Customer Support on Twitter** from Kaggle:
-
-`thoughtvector/customer-support-on-twitter`
-
-The original dataset contains approximately 3 million tweets from customer-support conversations between customers and brands.
-
-For this project, a smaller subsample is used for development and evaluation so that the complete pipeline can be reproduced quickly.
-
-### Data used by this project
-
-* Historical customer-support conversations
-* A selected brand/support account
-* Hand-labelled examples for intent classification
-* A separate golden evaluation set
-
-The project does not require running against the full dataset.
+> **Understand → Retrieve → Respond → Verify → Escalate when uncertain**
 
 ---
 
-## 3. Project Structure
+# 🔑 Key Features
 
-```text
-hiver-support-agent/
-│
-├── README.md
-├── run_agent.py
-├── intents.py
-├── create_golden_set.py
-├── label_golden_set.py
-├── explore_data.py
-├── test_agent.py
-│
-├── amazon_conversations_sample.xlsx
-│
-├── data/
-│   └── project data
-│
-└── src/
-    └── agent implementation
-```
+## Intent Classification
 
----
-
-## 4. Main Components
-
-### Intent Classification
-
-The classifier maps an incoming customer message to one of the project-specific support intents.
+The agent analyzes the incoming message and predicts the most likely support intent.
 
 Example:
 
@@ -100,49 +100,48 @@ Example:
 Customer:
 "I forgot my password"
 
-Intent:
+Predicted Intent:
 password_issue
 ```
 
-The classifier also returns a confidence score.
+The model also produces a confidence score.
 
-Low-confidence predictions are not blindly automated.
+This confidence is used downstream to determine whether automation is appropriate.
 
 ---
 
-### Historical Retrieval
+## 🔍 Historical Conversation Retrieval
 
-The agent searches historical support conversations for examples that are semantically similar to the current customer message.
+The system searches historical customer-support conversations for similar examples.
 
-The retrieved conversation provides evidence about how similar issues were handled historically.
+The retrieved evidence contains:
+
+* Historical customer message
+* Historical support response
+* Similarity score
 
 Example:
 
 ```text
-Customer message:
+Customer Message:
 "My password is not working"
 
-Historical example:
+Historical Customer Message:
 "I can't log into my account"
 
-Historical response:
+Historical Support Response:
 "Please contact support so we can help you regain access."
 ```
 
-The historical response is used as grounding/context rather than treating the model's generated answer as authoritative.
+Historical conversations provide grounding for the generated response.
 
 ---
 
-### Escalation
+# 🧠 Confidence-Based Escalation
 
-The system decides whether a request should be automatically handled or sent to a human.
+One of the key design decisions is **not to automatically answer every request**.
 
-Current escalation signals include:
-
-* Low intent confidence
-* Unclear customer request
-* Insufficient historical evidence
-* Potentially unsupported situations
+If the intent prediction has low confidence, the system escalates the request to a human.
 
 Example:
 
@@ -160,23 +159,172 @@ Escalation reason:
 Low intent confidence
 ```
 
-This conservative behaviour is intentional: an uncertain support agent should prefer escalation over confidently giving an incorrect answer.
+This reflects an important customer-support principle:
+
+> **An uncertain answer is often worse than a human escalation.**
 
 ---
 
-## 5. Running the Project
+# 💬 Example
 
-### Requirements
+### Input
 
-Python 3.10+ is recommended.
+```text
+my passwird is not workinh
+```
 
-Install dependencies:
+The system processes the request through the complete pipeline.
+
+### Output
+
+```text
+Predicted intent:
+other
+
+Confidence:
+0.303
+
+Escalate to human:
+True
+
+Escalation reason:
+Low intent confidence
+
+Draft reply:
+I'm sorry you're having trouble. Please provide a few more details so Amazon support can better assist you.
+
+Historical evidence similarity:
+0.491
+```
+
+The typo-heavy input also demonstrates an important real-world challenge: customer messages are not always clean or grammatically correct.
+
+---
+
+# 📊 Dataset
+
+The project is based on the **Customer Support on Twitter** dataset.
+
+The original dataset contains approximately **3 million tweets** from customer-support interactions between customers and brands.
+
+For development, a smaller sample is used rather than processing the entire dataset.
+
+The current working pipeline processes approximately:
+
+```text
+81,664 historical conversations
+```
+
+A smaller labelled dataset is used for the initial intent-classification prototype.
+
+---
+
+# 🛠️ Technology Stack
+
+| Technology   | Purpose                        |
+| ------------ | ------------------------------ |
+| Python       | Core programming language      |
+| Pandas       | Data processing                |
+| NumPy        | Numerical operations           |
+| Scikit-learn | Machine learning               |
+| Matplotlib   | Data visualization             |
+| Excel/XLSX   | Dataset storage and inspection |
+| Git          | Version control                |
+| GitHub       | Source-code hosting            |
+
+---
+
+# 📁 Project Structure
+
+```text
+hiver-support-agent/
+│
+├── README.md
+├── REPORT.md
+│
+├── run_agent.py
+├── intents.py
+├── create_golden_set.py
+├── label_golden_set.py
+├── explore_data.py
+├── test_agent.py
+│
+├── amazon_conversations_sample.xlsx
+│
+├── data/
+│   └── dataset files
+│
+└── src/
+    └── agent implementation
+```
+
+---
+
+# ⚙️ Installation
+
+## Prerequisites
+
+Recommended:
+
+```text
+Python 3.10+
+Git
+```
+
+Check your Python installation:
+
+```bash
+python --version
+```
+
+---
+
+## Clone the Repository
+
+```bash
+git clone <YOUR_GITHUB_REPOSITORY_URL>
+```
+
+Navigate into the project:
+
+```bash
+cd hiver-support-agent
+```
+
+---
+
+## Create Virtual Environment
+
+### Windows PowerShell
+
+```powershell
+python -m venv .venv
+```
+
+Activate it:
+
+```powershell
+.venv\Scripts\Activate.ps1
+```
+
+### macOS / Linux
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+---
+
+# 📦 Install Dependencies
+
+If `requirements.txt` is available:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-If `requirements.txt` is not available, install the main dependencies:
+Otherwise:
 
 ```bash
 pip install pandas numpy scikit-learn matplotlib openpyxl
@@ -184,7 +332,7 @@ pip install pandas numpy scikit-learn matplotlib openpyxl
 
 ---
 
-### Run the Agent
+# ▶️ Run the Agent
 
 From the project root:
 
@@ -192,386 +340,312 @@ From the project root:
 python run_agent.py
 ```
 
-Example:
+The program will:
 
-```text
-Customer message: my password is not working
-
-============================================================
-                SUPPORT AGENT
-============================================================
-
-Predicted intent:
-password_issue
-
-Confidence:
-0.XX
-
-Escalate to human:
-...
-
-Escalation reason:
-...
-
-Draft reply:
-...
-
-Historical evidence similarity:
-...
-
-Historical customer example:
-...
-
-Historical support response:
-...
-```
+1. Load the labelled examples.
+2. Load historical conversations.
+3. Accept a customer message.
+4. Predict the customer intent.
+5. Calculate confidence.
+6. Search historical conversations.
+7. Draft a response.
+8. Decide whether to escalate.
 
 ---
 
-## 6. Creating the Golden Evaluation Set
+# 🧪 Testing
 
-The golden set contains manually labelled customer messages that are kept separate from the training data.
-
-Generate candidate examples:
+Run:
 
 ```bash
-python create_golden_set.py
+python test_agent.py
 ```
 
-The target evaluation set contains approximately **150–250 examples**, as required by the assignment.
-
-Each example should contain at least:
-
-```text
-customer_message
-gold_intent
-```
-
-Additional fields may include:
-
-```text
-predicted_intent
-confidence
-escalation_decision
-```
-
-### Sampling methodology
-
-Examples should be sampled from real customer-support conversations rather than generated artificially.
-
-The sample should include:
-
-* Common support issues
-* Rare intents
-* Short messages
-* Long messages
-* Misspellings
-* Ambiguous requests
-* Different ways of expressing the same problem
-
-The examples are manually labelled using the project's intent definitions.
+The testing workflow is intended to verify the main components of the support-agent pipeline.
 
 ---
 
-## 7. Evaluation
+# 📈 Evaluation Strategy
 
-The evaluation harness measures both classification quality and support-agent behaviour.
+A production-quality support agent cannot be evaluated only by checking whether the code runs.
 
-Recommended metrics include:
+The intended evaluation framework includes:
 
 ### Intent Classification
 
 * Accuracy
 * Macro F1
-* Per-intent precision
-* Per-intent recall
+* Precision
+* Recall
+* Per-intent performance
 * Confusion matrix
-
-Macro F1 is particularly important because some support intents may have fewer examples than others.
 
 ### Escalation
 
-Measure:
-
-* Percentage of requests escalated
-* Escalation precision
-* Escalation recall
+* Escalation rate
+* Correct escalation rate
 * Incorrect auto-handling rate
+* Performance at different confidence thresholds
 
-The goal is not simply to minimize escalation.
+### Response Quality
 
-A useful support agent should balance automation with safety.
+Responses should be evaluated on:
 
-### Reply Quality
-
-Generated replies are evaluated for:
-
-1. Relevance
-2. Correctness
-3. Grounding in historical evidence
-4. Helpfulness
-5. Appropriate escalation
-6. Hallucination/unsupported claims
-7. Professional tone
+* Relevance
+* Correctness
+* Grounding
+* Helpfulness
+* Safety
+* Clarity
+* Appropriate escalation
 
 ---
 
-## 8. Baselines
+# 🧪 Golden Evaluation Set
 
-The AI agent is compared against at least two simpler approaches.
+A robust evaluation requires a manually labelled evaluation set separate from the training examples.
+
+The target is:
+
+```text
+150–250 manually labelled examples
+```
+
+The evaluation set should contain:
+
+* Common intents
+* Rare intents
+* Ambiguous messages
+* Short messages
+* Long messages
+* Typos
+* Noisy customer language
+
+The golden set should not be used for training.
+
+This separation prevents data leakage and provides a more realistic estimate of generalization.
+
+---
+
+# 📊 Baselines
+
+The final evaluation should compare the support agent against simple baselines.
 
 ### Baseline 1 — Majority Class
 
-Always predict the most frequent intent in the training set.
+Always predict the most frequent intent.
 
-This establishes a trivial lower bound.
+This provides a trivial reference point.
 
-### Baseline 2 — Simple Text Classifier
+### Baseline 2 — TF-IDF + Logistic Regression
 
-A simple TF-IDF + Logistic Regression classifier is used as a stronger non-LLM baseline.
+A traditional machine-learning text classifier provides a stronger non-LLM baseline.
 
 ```text
 Customer Message
-       |
-       v
+       ↓
 TF-IDF
-       |
-       v
+       ↓
 Logistic Regression
-       |
-       v
-Intent
+       ↓
+Predicted Intent
 ```
 
-The final system should be compared against both baselines on the same golden set.
+The proposed system should be evaluated on the same golden set as both baselines.
 
 ---
 
-## 9. LLM-as-Judge
+# 🤖 LLM-as-Judge
 
-An LLM-based evaluator can score generated support replies using a fixed rubric.
+Generated responses can be evaluated using an LLM-based judge with a fixed rubric.
 
-Each response is evaluated on a 1–5 scale for:
+Each response can be scored on a 1–5 scale for:
 
-| Criterion   | Description                                  |
-| ----------- | -------------------------------------------- |
-| Relevance   | Addresses the customer's actual problem      |
-| Correctness | Does not introduce unsupported information   |
-| Grounding   | Consistent with historical support behaviour |
-| Helpfulness | Provides a useful next step                  |
-| Safety      | Escalates when appropriate                   |
-| Clarity     | Clear and professional                       |
+| Category    | Question                                        |
+| ----------- | ----------------------------------------------- |
+| Relevance   | Does the response address the customer's issue? |
+| Correctness | Is the information accurate?                    |
+| Grounding   | Is it supported by historical evidence?         |
+| Helpfulness | Does it provide a useful next step?             |
+| Safety      | Does it avoid unsafe automation?                |
+| Clarity     | Is the response clear and professional?         |
 
-The judge should receive the customer message, historical evidence, generated response, and evaluation rubric.
+The LLM judge should not automatically be treated as ground truth.
 
----
-
-## 10. Human Agreement
-
-LLM-as-judge results should not be treated as ground truth.
-
-A subset of generated replies is manually evaluated using the same rubric.
-
-Agreement between human and LLM ratings can then be measured using:
-
-* Exact agreement
-* Mean absolute difference
-* Correlation
-* Cohen's kappa for categorical judgements where applicable
-
-This provides evidence for how reliable the automated judge is.
+A human-labelled subset should be used to measure agreement.
 
 ---
 
-## 11. Failure Analysis
+# 🔎 Failure Analysis
 
-The evaluation should identify the top failure modes rather than reporting only one headline metric.
+Important failure modes observed during development include:
 
-Examples of failure categories include:
-
-### 1. Short or ambiguous messages
+### 1. Misspelled Messages
 
 Example:
-
-```text
-"it doesn't work"
-```
-
-There may not be enough information to identify the customer's intent.
-
-### 2. Misspellings
-
-Example:
-
-```text
-"my passwird is not workinh"
-```
-
-Noisy text can reduce classifier confidence.
-
-### 3. Overlapping intents
-
-Different support issues may use similar vocabulary, making intent boundaries difficult.
-
-### 4. Insufficient historical evidence
-
-A relevant historical conversation may not exist in the retrieved sample.
-
-### 5. Incorrect automation
-
-A high-confidence prediction does not necessarily mean that automatic handling is safe.
-
-These failures should be supported with actual examples from the evaluation set.
-
----
-
-## 12. What Is Misleading About My Headline Number?
-
-A high classification accuracy alone does not mean the support agent is trustworthy.
-
-For example, if one intent is much more common than others, a classifier can achieve a deceptively high accuracy by predicting common intents while performing poorly on rare but important cases.
-
-Similarly:
-
-```text
-High intent accuracy
-        ≠
-High-quality support
-```
-
-A useful support agent must also:
-
-* Retrieve relevant evidence
-* Produce a grounded response
-* Avoid hallucinating policies
-* Escalate uncertain cases
-* Handle noisy customer messages
-* Perform well across different intents
-
-Therefore, headline accuracy should always be interpreted together with macro F1, per-intent results, reply quality, escalation behaviour, and failure analysis.
-
----
-
-## 13. Design Decisions
-
-Important non-obvious decisions made during development include:
-
-1. Use a small intent taxonomy rather than attempting to reproduce every possible customer issue.
-2. Use manually labelled examples for evaluation rather than relying only on training metrics.
-3. Keep the golden set separate from training examples.
-4. Use historical conversations as grounding evidence.
-5. Include confidence-based escalation.
-6. Prefer human escalation when intent confidence is low.
-7. Include noisy and misspelled customer messages in evaluation.
-8. Compare against simple baselines.
-9. Evaluate generated replies separately from intent classification.
-10. Treat LLM-as-judge as an evaluator rather than ground truth.
-11. Measure human/LLM agreement.
-12. Report failure cases instead of hiding them.
-13. Use a subsample of the large dataset for reproducibility.
-14. Avoid claiming that a generated response is correct solely because it sounds fluent.
-15. Prefer conservative automation for uncertain support cases.
-
----
-
-## 14. Limitations
-
-This is a prototype built for the take-home assignment.
-
-Important limitations include:
-
-* The labelled training set is relatively small.
-* The historical dataset is a subsample rather than the full Twitter support dataset.
-* Historical responses may themselves contain inconsistencies.
-* Retrieval quality depends on the available historical examples.
-* Intent boundaries can be subjective.
-* LLM-based evaluation can introduce evaluator bias.
-* The system does not have access to real customer account information.
-* The system should therefore draft responses rather than directly execute account actions.
-
----
-
-## 15. Future Improvements
-
-With another week of development, I would focus on:
-
-### Better Intent Classification
-
-Increase the labelled training set and improve handling of noisy/typo-heavy messages.
-
-### Better Retrieval
-
-Use stronger semantic retrieval and reranking to identify the most relevant historical support conversations.
-
-### Confidence Calibration
-
-Calibrate confidence scores so that escalation thresholds correspond more reliably to actual error rates.
-
-### Better Reply Evaluation
-
-Expand the human-labelled evaluation set and improve validation of the LLM judge.
-
-### Conversation Context
-
-Use multiple messages from the same conversation rather than relying primarily on an isolated customer message.
-
-### Production Safety
-
-Add explicit policies for:
-
-* Sensitive requests
-* Account actions
-* Refunds
-* Payments
-* Authentication
-* Personal information
-
-These should be routed to humans where appropriate.
-
----
-
-## 16. Example
-
-Input:
 
 ```text
 my passwird is not workinh
 ```
 
-The agent processes the message through:
+Noisy language can reduce classifier confidence.
+
+### 2. Very Short Messages
+
+Messages such as:
 
 ```text
-                    Customer Message
-                           |
-                           v
-                 Intent Classification
-                           |
-                           v
-                  Confidence = 0.XXX
-                           |
-             +-------------+-------------+
-             |                           |
-        High confidence             Low confidence
-             |                           |
-             v                           v
-       Historical Search           Human Escalation
-             |
-             v
-       Similar Conversation
-             |
-             v
-        Grounded Draft Reply
+"It doesn't work"
 ```
 
-This architecture is intentionally conservative: the system should not automate a request simply because it can generate a fluent answer.
+contain insufficient context.
+
+### 3. Overlapping Intents
+
+Different support issues may contain similar words and concepts.
+
+### 4. Limited Labelled Data
+
+A small number of labelled examples limits the model's ability to generalize to unseen phrasing.
+
+### 5. Missing Historical Evidence
+
+The system may not find a sufficiently similar historical conversation for unusual requests.
 
 ---
 
-## 17. Reproducibility
+# ⚠️ Current Limitations
 
-The goal is to make the main results reproducible in under 15 minutes using a sampled dataset.
+This implementation is currently a **working prototype** rather than a production-ready customer-support system.
 
-Basic setup:
+Current limitations include:
+
+* Small labelled training set.
+* Limited intent taxonomy.
+* Evaluation framework still requires expansion.
+* Historical data is a sampled subset.
+* Retrieval quality depends on available historical conversations.
+* Customer messages can be ambiguous or misspelled.
+* Historical support responses may contain inconsistencies.
+* The agent does not directly perform account-level actions.
+* Automated responses should not be treated as guaranteed correct.
+
+These limitations are important because a high model confidence score does not necessarily mean that a response is safe or correct.
+
+---
+
+# 🚀 Future Improvements
+
+With additional development time, I would focus on:
+
+### Better Intent Classification
+
+Expand and balance the labelled training data.
+
+### Better Retrieval
+
+Use stronger semantic embeddings and reranking to improve historical evidence retrieval.
+
+### Confidence Calibration
+
+Tune escalation thresholds using validation data rather than selecting them arbitrarily.
+
+### Conversation-Level Context
+
+Use the entire conversation thread rather than relying only on individual messages.
+
+### Stronger Evaluation
+
+Build the complete 150–250 example golden set and compare the system against multiple baselines.
+
+### Human Evaluation
+
+Measure how closely the LLM judge agrees with human reviewers.
+
+### Production Safety
+
+Introduce explicit rules for sensitive operations such as:
+
+* Payments
+* Refunds
+* Account recovery
+* Authentication
+* Personal information
+* Account changes
+
+These should receive additional verification or human review.
+
+---
+
+# 📝 Engineering Decisions
+
+Some important design decisions include:
+
+1. Use a small intent taxonomy rather than attempting to classify every possible support issue.
+2. Use historical conversations as grounding evidence.
+3. Keep evaluation data separate from training data.
+4. Use confidence-based escalation.
+5. Prefer human review for uncertain cases.
+6. Include noisy customer messages in evaluation.
+7. Compare against simple baselines.
+8. Evaluate response quality separately from classification quality.
+9. Treat LLM-as-judge results as evaluation evidence rather than absolute truth.
+10. Use a dataset sample to keep development reproducible.
+11. Avoid directly executing sensitive customer actions.
+12. Report failure cases rather than hiding them.
+13. Focus on evidence and evaluation rather than relying on a single accuracy number.
+
+---
+
+# 📌 What Is Misleading About a Headline Number?
+
+A single accuracy number can be misleading.
+
+For example:
+
+```text
+90% Accuracy
+```
+
+does not necessarily mean:
+
+```text
+90% of customers receive good automated support.
+```
+
+A classifier may perform well on common intents while failing on rare but important customer problems.
+
+Similarly:
+
+```text
+High classification accuracy
+        ≠
+High-quality support
+```
+
+A trustworthy support agent must also retrieve relevant evidence, generate grounded responses, identify uncertainty, and escalate appropriately.
+
+Therefore, performance should be considered using multiple signals:
+
+```text
+Intent Quality
++
+Retrieval Quality
++
+Response Quality
++
+Escalation Quality
++
+Failure Analysis
+```
+
+---
+
+# 📚 Reproducibility
+
+The project is designed so that a reviewer can reproduce the core pipeline quickly.
+
+Basic workflow:
 
 ```bash
 git clone <repository-url>
@@ -579,7 +653,7 @@ cd hiver-support-agent
 
 python -m venv .venv
 
-# Windows PowerShell
+# Windows
 .venv\Scripts\Activate.ps1
 
 pip install -r requirements.txt
@@ -587,33 +661,65 @@ pip install -r requirements.txt
 python run_agent.py
 ```
 
-Evaluation:
-
-```bash
-python create_golden_set.py
-python test_agent.py
-```
-
-If evaluation scripts require API credentials, configure them through environment variables rather than committing credentials to GitHub.
+The development dataset is intentionally smaller than the original dataset so that the project can be tested without processing millions of tweets.
 
 ---
 
-## 18. Conclusion
+# 🔐 Security
 
-This project focuses on building a support agent that is not only capable of generating responses, but also provides evidence for when those responses should be trusted.
+Do not commit sensitive information to the repository.
 
-The central design principle is:
+The `.gitignore` should include:
 
 ```text
-Classify
-   ↓
-Retrieve evidence
-   ↓
-Draft response
-   ↓
-Evaluate confidence
-   ↓
-Automate OR Escalate
+.venv/
+__pycache__/
+*.pyc
+.env
 ```
 
-The system is intentionally designed around **measurable performance and conservative escalation**, rather than treating fluent text generation as proof of correctness.
+API keys, credentials, tokens, and private customer information should never be committed to GitHub.
+
+---
+
+# 📄 Assignment Report
+
+Additional project details and analysis are available in:
+
+```text
+REPORT.md
+```
+
+---
+
+# 👩‍💻 Author
+
+**Salma**
+
+AI / Machine Learning Developer
+
+Interested in building practical AI systems that combine:
+
+```text
+Machine Learning
++
+Natural Language Processing
++
+Generative AI
++
+Software Engineering
+```
+
+This project represents hands-on work in building an AI system from real-world, noisy customer-support data rather than relying only on theoretical ML examples.
+
+---
+
+# ⭐ Key Takeaway
+
+The objective of this project is not simply to generate a convincing support response.
+
+The goal is to build a system that knows:
+
+> **what it understands, what evidence it has, and when it should ask a human for help.**
+
+That distinction is central to building reliable AI systems for real-world customer support.
